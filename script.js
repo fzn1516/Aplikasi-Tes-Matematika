@@ -4,15 +4,19 @@ const PASSWORD_GURU="admin123"
 
 let waktuTes = localStorage.getItem("timerTes") || 20
 
-let soal=[
+/* ================= BANK SOAL ================= */
+
+let soal = JSON.parse(localStorage.getItem("bankSoal")) || [
 {t:"2 + 2 = ?",a:["3","4","5"],k:1,bobot:1},
 {t:"5 x 2 = ?",a:["10","8","12"],k:0,bobot:1},
 {t:"10 - 5 = ?",a:["5","4","6"],k:0,bobot:1},
 {t:"Ibukota Indonesia?",a:["Bandung","Jakarta","Surabaya"],k:1,bobot:1}
 ]
 
+localStorage.setItem("bankSoal",JSON.stringify(soal))
+
 let index=0
-let jawaban=JSON.parse(localStorage.getItem("jawabanSiswa"))||[]
+let jawaban=[]
 let waktu = waktuTes * 60
 let timerInterval
 
@@ -39,6 +43,17 @@ if(nama.value==""){
 alert("Isi nama dulu")
 return
 }
+
+/* ambil soal terbaru */
+soal = JSON.parse(localStorage.getItem("bankSoal")) || []
+
+if(soal.length==0){
+alert("Belum ada soal!")
+return
+}
+
+jawaban=[]
+index=0
 
 waktu = (localStorage.getItem("timerTes") || 20) * 60
 
@@ -102,19 +117,19 @@ function simpan(i){
 
 jawaban[index]=i
 
-localStorage.setItem("jawabanSiswa",JSON.stringify(jawaban))
-
 updateNomor()
 
 }
 
-/* ================= UPDATE NOMOR SOAL ================= */
+/* ================= UPDATE NOMOR ================= */
 
 function updateNomor(){
 
 soal.forEach((s,i)=>{
 
 let btn=document.getElementById("n"+i)
+
+if(!btn) return
 
 btn.classList.remove("aktif","jawab","kosong")
 
@@ -126,7 +141,9 @@ btn.classList.add("kosong")
 
 })
 
-document.getElementById("n"+index).classList.add("aktif")
+let aktif=document.getElementById("n"+index)
+
+if(aktif) aktif.classList.add("aktif")
 
 }
 
@@ -228,13 +245,11 @@ let data=JSON.parse(localStorage.getItem("nilai"))||[]
 
 data.push({
 nama:nama.value,
-kelas:kelas.value,
+kelas:kelas.value || "-",
 nilai:nilaiAkhir
 })
 
 localStorage.setItem("nilai",JSON.stringify(data))
-
-localStorage.removeItem("jawabanSiswa")
 
 tesPage.style.display="none"
 hasilPage.style.display="block"
@@ -271,11 +286,11 @@ function buatGrafik(){
 let data=JSON.parse(localStorage.getItem("nilai"))||[]
 
 let nama=[]
-let nilai=[]
+let nilaiArr=[]
 
 data.forEach(d=>{
 nama.push(d.nama)
-nilai.push(d.nilai)
+nilaiArr.push(d.nilai)
 })
 
 new Chart(grafikNilai,{
@@ -284,7 +299,7 @@ data:{
 labels:nama,
 datasets:[{
 label:"Nilai",
-data:nilai
+data:nilaiArr
 }]
 }
 })
@@ -307,7 +322,7 @@ statistik.innerHTML="Rata-rata: "+avg.toFixed(1)
 
 }
 
-/* ================= REKAP + PERINGKAT ================= */
+/* ================= REKAP ================= */
 
 function buatRekap(){
 
@@ -387,6 +402,8 @@ renderSoal()
 
 function renderSoal(){
 
+soal = JSON.parse(localStorage.getItem("bankSoal")) || []
+
 let html=""
 
 soal.forEach((s,i)=>{
@@ -420,6 +437,8 @@ bobot:Number(bobot.value)
 
 soal.push(obj)
 
+localStorage.setItem("bankSoal",JSON.stringify(soal))
+
 renderSoal()
 
 soalBaru.value=""
@@ -436,6 +455,8 @@ alert("Soal ditambahkan")
 function hapusSoal(i){
 
 soal.splice(i,1)
+
+localStorage.setItem("bankSoal",JSON.stringify(soal))
 
 renderSoal()
 
