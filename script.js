@@ -4,22 +4,34 @@ const PASSWORD_GURU="admin123"
 
 let waktuTes = localStorage.getItem("timerTes") || 20
 
-/* ================= BANK SOAL ================= */
+/* ================= BANK SOAL DARI SERVER ================= */
 
-let soal = JSON.parse(localStorage.getItem("bankSoal")) || [
-{t:"2 + 2 = ?",a:["3","4","5"],k:1,bobot:1},
-{t:"5 x 2 = ?",a:["10","8","12"],k:0,bobot:1},
-{t:"10 - 5 = ?",a:["5","4","6"],k:0,bobot:1},
-{t:"Ibukota Indonesia?",a:["Bandung","Jakarta","Surabaya"],k:1,bobot:1}
-]
+let soal=[]
 
-localStorage.setItem("bankSoal",JSON.stringify(soal))
+async function loadSoal(){
+
+try{
+
+let res = await fetch("soal.json")
+
+soal = await res.json()
+
+}catch(e){
+
+alert("Gagal memuat soal")
+
+}
+
+}
+
+/* ================= VARIABEL TES ================= */
 
 let index=0
 let jawaban=[]
 let waktu = waktuTes * 60
 let timerInterval
 
+/* ================= NAVIGASI ================= */
 
 function keLogin(){
 homePage.style.display="none"
@@ -37,18 +49,17 @@ location.reload()
 
 /* ================= MULAI TES ================= */
 
-function mulaiTes(){
+async function mulaiTes(){
 
 if(nama.value==""){
 alert("Isi nama dulu")
 return
 }
 
-/* ambil soal terbaru */
-soal = JSON.parse(localStorage.getItem("bankSoal")) || []
+await loadSoal()
 
 if(soal.length==0){
-alert("Belum ada soal!")
+alert("Soal belum tersedia")
 return
 }
 
@@ -387,86 +398,6 @@ a.click()
 function resetNilai(){
 localStorage.removeItem("nilai")
 alert("Nilai dihapus")
-}
-
-/* ================= EDIT SOAL ================= */
-
-function tampilSoalGuru(){
-
-dashboard.style.display="none"
-editSoalPage.style.display="block"
-
-renderSoal()
-
-}
-
-function renderSoal(){
-
-soal = JSON.parse(localStorage.getItem("bankSoal")) || []
-
-let html=""
-
-soal.forEach((s,i)=>{
-
-html+=`
-<div class="soalItem">
-<b>${i+1}. ${s.t}</b><br>
-A. ${s.a[0]}<br>
-B. ${s.a[1]}<br>
-C. ${s.a[2]}<br>
-Kunci: ${s.k}
-<br>
-<button onclick="hapusSoal(${i})">Hapus</button>
-</div>
-`
-
-})
-
-listSoal.innerHTML=html
-
-}
-
-function tambahSoal(){
-
-let obj={
-t:soalBaru.value,
-a:[a1.value,a2.value,a3.value],
-k:Number(kunci.value),
-bobot:Number(bobot.value)
-}
-
-soal.push(obj)
-
-localStorage.setItem("bankSoal",JSON.stringify(soal))
-
-renderSoal()
-
-soalBaru.value=""
-a1.value=""
-a2.value=""
-a3.value=""
-kunci.value=""
-bobot.value=""
-
-alert("Soal ditambahkan")
-
-}
-
-function hapusSoal(i){
-
-soal.splice(i,1)
-
-localStorage.setItem("bankSoal",JSON.stringify(soal))
-
-renderSoal()
-
-}
-
-function kembaliDashboard(){
-
-editSoalPage.style.display="none"
-dashboard.style.display="block"
-
 }
 
 /* ================= TIMER GURU ================= */
